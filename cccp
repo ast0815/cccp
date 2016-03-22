@@ -7,6 +7,14 @@ Usage:
     $(basename $0) <source> <destination>
 "
 
+on_die()
+{
+	echo "Dying..."
+	exit 1
+}
+
+trap 'on_die' HUP INT KILL TERM
+
 if [ $# -ne 2 ]
 then
     echo "$USAGE"
