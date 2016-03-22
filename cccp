@@ -7,13 +7,18 @@ Usage:
     $(basename $0) <source> <destination>
 "
 
+LOCKFILE=""
 on_die()
 {
 	echo "Dying..."
+    if [ ! -z "$LOCKFILE" ]
+    then
+        rm "$LOCKFILE"
+    fi
 	exit 1
 }
 
-trap 'on_die' HUP INT KILL TERM
+trap 'on_die' HUP INT TERM
 
 if [ $# -ne 2 ]
 then
