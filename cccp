@@ -16,7 +16,7 @@ SRCDIR=$(dirname "$1")
 DSTDIR=$(dirname "$2")
 
 LOCKS=$(find $SRCDIR -maxdepth 1 -mmin -30 -name .cccp-lock-* | wc -l)
-MAXLOCKS=1
+MAXLOCKS=10
 
 echo "Waiting for free lock..."
 
