@@ -4,7 +4,7 @@ USAGE="
 cccp - Crowd Control Copy
 
 Usage:
-    $0 <source> <destination>
+    $(basename $0) <source> <destination>
 "
 
 if [ $# -ne 2 ]
