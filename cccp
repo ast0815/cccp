@@ -1,0 +1,36 @@
+#!/bin/bash
+
+USAGE="
+cccp - Crowd Control Copy
+
+Usage:
+    $0 <source> <destination>
+"
+
+if [ $# -ne 2 ]
+then
+    echo "$USAGE"
+fi
+
+SRCDIR=$(dirname "$1")
+DSTDIR=$(dirname "$2")
+
+LOCKS=$(find $SRCDIR -maxdepth 1 -mmin -30 -name .cccp-lock-* | wc -l)
+MAXLOCKS=1
+
+echo "Waiting for free lock..."
+
+while [ $LOCKS -ge $MAXLOCKS ]
+do
+    sleep $(( $RANDOM / 1024 ))
+    LOCKS=$(find $SRCDIR -maxdepth 1 -mmin -30 -name .cccp-lock-* | wc -l)
+done
+
+echo "Starting copy operation..."
+
+LOCKFILE="$SRCDIR/.cccp-lock-$(hostname)-$RANDOM"
+touch $LOCKFILE
+cp -v $1 $2
+rm $LOCKFILE
+
+echo "Done."
