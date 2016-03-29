@@ -38,7 +38,7 @@ echo "Waiting for free lock..."
 
 while [ $LOCKS -ge $MAXLOCKS ]
 do
-    sleep $(( $RANDOM % 300 ))
+    sleep $(( $RANDOM % 1200 ))
     LOCKS=$(find $SRCDIR -maxdepth 1 -mmin -30 -name .cccp-lock-* | wc -l)
 done
 
