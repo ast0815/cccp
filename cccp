@@ -31,7 +31,7 @@ LOCKDIR=$SRCDIR/.cccp
 mkdir -p "$LOCKDIR"
 DSTDIR=$(dirname "$2")
 
-LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -120 -name .cccp-lock-* | wc -l)
+LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name .cccp-lock-* | wc -l)
 MAXLOCKS=10
 
 echo "Waiting for free lock..."
@@ -39,7 +39,7 @@ echo "Waiting for free lock..."
 while [ $LOCKS -ge $MAXLOCKS ]
 do
     sleep $(( $RANDOM % 1200 ))
-    LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -120 -name .cccp-lock-* | wc -l)
+    LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name .cccp-lock-* | wc -l)
 done
 
 echo "Starting copy operation..."
