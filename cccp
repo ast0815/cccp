@@ -8,12 +8,17 @@ Usage:
 "
 
 LOCKFILE=""
+TICKETFILE=""
 on_die()
 {
 	echo "Dying..."
     if [ ! -z "$LOCKFILE" ]
     then
         rm "$LOCKFILE"
+    fi
+    if [ ! -z "$TICKETFILE" ]
+    then
+        rm "$TICKETFILE"
     fi
 	exit 1
 }
@@ -31,22 +36,31 @@ LOCKDIR=$SRCDIR/.cccp
 mkdir -p "$LOCKDIR"
 DSTDIR=$(dirname "$2")
 
-LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name .cccp-lock-* | wc -l)
+# Check how many other processes are copying or want to copy
+LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
+TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
 MAXLOCKS=10
+
+# Broadcast that we would like to copy a file
+TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
+touch "$TICKETFILE"
 
 echo "Waiting for free lock..."
 
 while [ $LOCKS -ge $MAXLOCKS ]
 do
-    sleep $(( $RANDOM % 1200 ))
-    LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name .cccp-lock-* | wc -l)
+    # If we cannot copy yet, wait an amount of time proportional to the number of waiting processes
+    sleep $(( 5 + $RANDOM % ($TICKETS * 60) ))
+    LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
+    TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
 done
 
 echo "Starting copy operation..."
 
-LOCKFILE="$LOCKDIR/.cccp-lock-$(hostname)-$RANDOM"
-touch $LOCKFILE
-cp -v $1 $2
-rm $LOCKFILE
+LOCKFILE="$LOCKDIR/cccp-lock-$(hostname)-$RANDOM"
+touch "$LOCKFILE"
+cp -v "$1" "$2"
+rm "$LOCKFILE"
+rm "$TICKETFILE"
 
 echo "Done."
