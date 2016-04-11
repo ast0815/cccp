@@ -36,14 +36,16 @@ LOCKDIR=$SRCDIR/.cccp
 mkdir -p "$LOCKDIR"
 DSTDIR=$(dirname "$2")
 
+# Broadcast that we would like to copy a file
+TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
+touch "$TICKETFILE"
+
+sleep $(( 1 + ($RANDOM % 10) ))
+
 # Check how many other processes are copying or want to copy
 LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
 TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
 MAXLOCKS=10
-
-# Broadcast that we would like to copy a file
-TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
-touch "$TICKETFILE"
 
 echo "Waiting for free lock..."
 
@@ -51,6 +53,8 @@ while [ $LOCKS -ge $MAXLOCKS ]
 do
     # If we cannot copy yet, wait an amount of time proportional to the number of waiting processes
     sleep $(( 5 + $RANDOM % ($TICKETS * 60) ))
+    # Make sure the ticket is still there and fresh
+    touch "$TICKETFILE"
     LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
     TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
 done
