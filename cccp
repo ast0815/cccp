@@ -22,7 +22,9 @@ rmlocks()
     fi
 }
 
-trap 'echo "Aborting..."; exit 1' HUP INT TERM
+trap 'echo "Aborting..."; rmlocks; trap - HUP; kill -HUP $$;' HUP
+trap 'echo "Aborting..."; rmlocks; trap - INT; kill -INT $$;' INT
+trap 'echo "Aborting..."; rmlocks; trap - TERM; kill -TERM $$;' TERM
 trap 'rmlocks' EXIT
 
 if [ $# -ne 2 ]
