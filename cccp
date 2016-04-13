@@ -9,21 +9,21 @@ Usage:
 
 LOCKFILE=""
 TICKETFILE=""
-on_die()
+rmlocks()
 {
-	echo "Dying..."
-    if [ ! -z "$LOCKFILE" ]
+    echo "Removing locks..."
+    if [ -f "$LOCKFILE" ]
     then
         rm "$LOCKFILE"
     fi
-    if [ ! -z "$TICKETFILE" ]
+    if [ -f "$TICKETFILE" ]
     then
         rm "$TICKETFILE"
     fi
-	exit 1
 }
 
-trap 'on_die' HUP INT TERM
+trap 'echo "Aborting..."; exit 1' HUP INT TERM
+trap 'rmlocks' EXIT
 
 if [ $# -ne 2 ]
 then
@@ -64,7 +64,4 @@ echo "Starting copy operation..."
 LOCKFILE="$LOCKDIR/cccp-lock-$(hostname)-$RANDOM"
 touch "$LOCKFILE"
 cp -v "$1" "$2"
-rm "$LOCKFILE"
-rm "$TICKETFILE"
-
 echo "Done."
