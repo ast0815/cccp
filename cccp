@@ -45,20 +45,41 @@ touch "$TICKETFILE"
 sleep $(( 1 + ($RANDOM % 10) ))
 
 # Check how many other processes are copying or want to copy
-LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
-TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
-MAXLOCKS=10
+MAXLOCKS=5
+function count_locks(){
+    TMP=$(mktemp)
+    find $LOCKDIR -maxdepth 1 -mmin -360 -name 'cccp-lock-*' >$TMP
+    if [ $? -ne 0 ]
+    then
+        LOCKS=$MAXLOCKS
+    else
+        LOCKS=$( wc -l $TMP | cut -d ' ' -f 1 )
+    fi
+    rm $TMP
+}
+function count_tickets(){
+    TMP=$(mktemp)
+    find $LOCKDIR -maxdepth 1 -mmin -360 -name 'cccp-ticket-*' >$TMP
+    if [ $? -ne 0 ]
+    then
+        TICKETS=$MAXLOCKS
+    else
+        TICKETS=$( wc -l $TMP | cut -d ' ' -f 1 )
+    fi
+    rm $TMP
+}
+count_locks
 
 echo "Waiting for free lock..."
 
-while [ $LOCKS -ge $MAXLOCKS ]
+while [ "$LOCKS" -ge "$MAXLOCKS" ]
 do
     # If we cannot copy yet, wait an amount of time proportional to the number of waiting processes
+    count_tickets
     sleep $(( 5 + $RANDOM % ($TICKETS * 60) ))
     # Make sure the ticket is still there and fresh
     touch "$TICKETFILE"
-    LOCKS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-lock-* | wc -l)
-    TICKETS=$(find $LOCKDIR -maxdepth 1 -mmin -360 -name cccp-ticket-* | wc -l)
+    count_locks
 done
 
 echo "Starting copy operation..."
