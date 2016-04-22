@@ -7,6 +7,12 @@ Usage:
     $(basename $0) <source> <destination>
 "
 
+if [ $# -lt 2 ]
+then
+    echo "$USAGE"
+    exit 1
+fi
+
 LOCKFILE=""
 TICKETFILE=""
 rmlocks()
@@ -26,12 +32,6 @@ trap 'echo "Aborting..."; rmlocks; trap - HUP; kill -HUP $$;' HUP
 trap 'echo "Aborting..."; rmlocks; trap - INT; kill -INT $$;' INT
 trap 'echo "Aborting..."; rmlocks; trap - TERM; kill -TERM $$;' TERM
 trap 'rmlocks' EXIT
-
-if [ $# -ne 2 ]
-then
-    echo "$USAGE"
-    exit 1
-fi
 
 SRCDIR=$(dirname "$1")
 LOCKDIR=$SRCDIR/.cccp
