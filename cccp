@@ -28,9 +28,9 @@ rmlocks()
     fi
 }
 
-trap 'echo "Aborting..."; rmlocks; trap - HUP; kill -HUP $$;' HUP
-trap 'echo "Aborting..."; rmlocks; trap - INT; kill -INT $$;' INT
-trap 'echo "Aborting..."; rmlocks; trap - TERM; kill -TERM $$;' TERM
+trap 'echo "Aborting..."; rmlocks; trap - EXIT; trap - HUP; kill -HUP $$;' HUP
+trap 'echo "Aborting..."; rmlocks; trap - EXIT; trap - INT; kill -INT $$;' INT
+trap 'echo "Aborting..."; rmlocks; trap - EXIT; trap - TERM; kill -TERM $$;' TERM
 trap 'rmlocks' EXIT
 
 SRCDIR=$(dirname "$1")
