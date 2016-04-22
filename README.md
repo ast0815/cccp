@@ -14,4 +14,12 @@ threshold. While copying, it creates a new lockfile.
   USAGE
 ---------
 
-    cccp <sourcefile> <destinationfile>
+    cccp [arguments] <source> <destination>
+
+  Arguments
+-------------
+
+    -A <lock-dir>
+        Create the lock files in <lock-dir> instead of at the source.
+    -D  Create the lock files at the destination instead of the source.
+    -h  Show the help text and exit.
