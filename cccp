@@ -4,8 +4,46 @@ USAGE="
 cccp - Crowd Control Copy
 
 Usage:
-    $(basename $0) <source> <destination>
+    $(basename $0) [arguments] <source> <destination>
+
+Arguments:
+    -A <lock-dir>
+        Create the lock files in <lock-dir> instead of at the source.
+    -D  Create the lock files at the destination instead of the source.
+    -h  Show this help text and exit.
 "
+
+LOCKDIR=""
+LOCKMODE="SOURCE"
+
+OPTIND=1
+while getopts "A:Dh" opt
+do
+    case "$opt" in
+        A)
+            LOCKDIR="$OPTARG"
+            LOCKMODE="ARBITER"
+            if [ ! -d "$LOCKDIR" ]
+            then
+                echo "$USAGE"
+                exit 1;
+            fi
+            ;;
+        D)
+            LOCKMODE="DESTINATION"
+            ;;
+        h)
+            echo "$USAGE"
+            exit 0
+            ;;
+        '?')
+            echo "$USAGE"
+            exit 1
+            ;;
+    esac
+done
+shift "$((OPTIND-1))" # Shift off the options and optional --.
+
 
 if [ $# -lt 2 ]
 then
@@ -33,10 +71,25 @@ trap 'echo "Aborting..."; rmlocks; trap - EXIT; trap - INT; kill -INT $$;' INT
 trap 'echo "Aborting..."; rmlocks; trap - EXIT; trap - TERM; kill -TERM $$;' TERM
 trap 'rmlocks' EXIT
 
-SRCDIR=$(dirname "$1")
-LOCKDIR=$SRCDIR/.cccp
-mkdir -p "$LOCKDIR"
-DSTDIR=$(dirname "$2")
+case $LOCKMODE in
+    SOURCE)
+        SRCDIR=$(dirname "$1")
+        LOCKDIR=$SRCDIR/.cccp
+        mkdir -p "$LOCKDIR"
+        ;;
+    DESTINATION)
+        if [[ "$2" == */ ]]
+        then
+            DSTDIR="$2"
+        else
+            DSTDIR=$(dirname "$2")
+        fi
+        LOCKDIR=$DSTDIR/.cccp
+        mkdir -p "$LOCKDIR"
+        ;;
+    ARBITER)
+        ;;
+esac
 
 # Broadcast that we would like to copy a file
 TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
