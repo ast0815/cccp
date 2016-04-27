@@ -139,5 +139,5 @@ echo "Starting copy operation..."
 
 LOCKFILE="$LOCKDIR/cccp-lock-$(hostname)-$RANDOM"
 touch "$LOCKFILE"
-cp -v "$1" "$2"
+cp -v "$1" "$2" || exit 1
 echo "Done."
