@@ -129,7 +129,7 @@ while [ "$LOCKS" -ge "$MAXLOCKS" ]
 do
     # If we cannot copy yet, wait an amount of time proportional to the number of waiting processes
     count_tickets
-    sleep $(( 5 + $RANDOM % ($TICKETS * 30) ))
+    sleep $(( 5 + $RANDOM % ($TICKETS * 20) ))
     # Make sure the ticket is still there and fresh
     touch "$TICKETFILE"
     count_locks
