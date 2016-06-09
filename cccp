@@ -95,7 +95,7 @@ esac
 TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
 touch "$TICKETFILE"
 
-sleep $(( 1 + ($RANDOM % 10) ))
+sleep $(( $RANDOM % 5 ))
 
 # Check how many other processes are copying or want to copy
 MAXLOCKS=5
