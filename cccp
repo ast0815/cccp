@@ -95,7 +95,7 @@ esac
 TICKETFILE="$LOCKDIR/cccp-ticket-$(hostname)-$RANDOM"
 touch "$TICKETFILE"
 
-sleep $(( $RANDOM % 5 ))
+sleep 1
 
 # Check how many other processes are copying or want to copy
 MAXLOCKS=5
@@ -121,6 +121,20 @@ function count_tickets(){
     fi
     rm $TMP
 }
+function count_fresh_tickets(){
+    TMP=$(mktemp)
+    find $LOCKDIR -maxdepth 1 -mmin -1 -name 'cccp-ticket-*' >$TMP
+    if [ $? -ne 0 ]
+    then
+        TICKETS=$MAXLOCKS
+    else
+        TICKETS=$( wc -l $TMP | cut -d ' ' -f 1 )
+    fi
+    rm $TMP
+}
+
+count_fresh_tickets
+sleep $(( RANDOM % TICKETS ))
 count_locks
 
 echo "Waiting for free lock..."
@@ -129,7 +143,7 @@ while [ "$LOCKS" -ge "$MAXLOCKS" ]
 do
     # If we cannot copy yet, wait an amount of time proportional to the number of waiting processes
     count_tickets
-    sleep $(( 5 + $RANDOM % ($TICKETS * 20) ))
+    sleep $(( 5 + $RANDOM % ($TICKETS * 10) ))
     # Make sure the ticket is still there and fresh
     touch "$TICKETFILE"
     count_locks
