@@ -101,12 +101,20 @@ sleep 1
 MAXLOCKS=5
 function count_locks(){
     TMP=$(mktemp)
+    T0=$(date +%s)
     find $LOCKDIR -maxdepth 1 -mmin -360 -name 'cccp-lock-*' >$TMP
     if [ $? -ne 0 ]
     then
         LOCKS=$MAXLOCKS
     else
-        LOCKS=$( wc -l $TMP | cut -d ' ' -f 1 )
+        T1=$(date +%s)
+        DT=$((T1-T0))
+        if [[ $DT -lt 5 ]]
+        then
+            LOCKS=$( wc -l $TMP | cut -d ' ' -f 1 )
+        else
+            LOCKS=$(( MAXLOCKS + DT ))
+        fi
     fi
     rm $TMP
 }
